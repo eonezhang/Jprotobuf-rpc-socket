@@ -41,6 +41,8 @@ public class RpcClientOptions {
     private long minEvictableIdleTime = 1000L * 60L * 2;
     private long maxWait = 2000L; // max wait time in milliseconds for pool available
     
+    private boolean lifo = false;
+    
     private boolean shareThreadPoolUnderEachProxy = false; // share a thread pool under each rpc proxy
 
     private boolean testOnBorrow = true;
@@ -51,6 +53,8 @@ public class RpcClientOptions {
 
     // if use chunkSize will split chunkSize
     private long chunkSize = -1;
+    
+    private boolean jmxEnabled = false;
 
     public void copyFrom(RpcClientOptions options) {
         if (options == null) {
@@ -74,6 +78,8 @@ public class RpcClientOptions {
         this.testOnBorrow = options.testOnBorrow;
         this.testOnReturn = options.testOnReturn;
         this.shareThreadPoolUnderEachProxy = options.shareThreadPoolUnderEachProxy;
+        this.jmxEnabled = options.jmxEnabled;
+        this.lifo = options.lifo;
     }
 
     /**
@@ -357,5 +363,35 @@ public class RpcClientOptions {
         this.shareThreadPoolUnderEachProxy = shareThreadPoolUnderEachProxy;
     }
 
+    /**
+     * get the jmxEnabled
+     * @return the jmxEnabled
+     */
+    public boolean isJmxEnabled() {
+        return jmxEnabled;
+    }
     
+    /**
+     * set jmxEnabled value to jmxEnabled
+     * @param jmxEnabled the jmxEnabled to set
+     */
+    public void setJmxEnabled(boolean jmxEnabled) {
+        this.jmxEnabled = jmxEnabled;
+    }
+    
+    /**
+     * set lifo value to lifo
+     * @param lifo the lifo to set
+     */
+    public void setLifo(boolean lifo) {
+        this.lifo = lifo;
+    }
+    
+    /**
+     * get the lifo
+     * @return the lifo
+     */
+    public boolean isLifo() {
+        return lifo;
+    }
 }
