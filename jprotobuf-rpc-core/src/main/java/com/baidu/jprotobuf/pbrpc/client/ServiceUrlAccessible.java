@@ -13,30 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.baidu.jprotobuf.pbrpc.client;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-
 /**
- * Proxy factory by JDK default implements.
+ * Service URL accessible interface.
  * 
+ *
  * @author xiemalin
- * @since 1.0
+ * @since 3.2.5
  */
-@SuppressWarnings({"unchecked","rawtypes"})
-public class ProxyFactory {
+public interface ServiceUrlAccessible {
 
     /**
-     * To create proxy object. 
-     * 
-     * @param <T> 
-     * @param type proxy class type
-     * @param handler invocation handler
-     * @return proxied object.
+     * get service URL with pattern of host:port
+     * @return serivce URL
      */
-    public static <T> T createProxy(Class[] clazz, ClassLoader classLoader, InvocationHandler handler) {
-        return (T) Proxy.newProxyInstance(classLoader, clazz, handler);
-    }
+    String getServiceUrl();
 }
