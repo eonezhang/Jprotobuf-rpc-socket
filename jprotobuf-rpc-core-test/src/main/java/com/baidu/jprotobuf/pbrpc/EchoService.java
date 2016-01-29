@@ -16,7 +16,7 @@
 
 package com.baidu.jprotobuf.pbrpc;
 
-import com.baidu.jprotobuf.pbrpc.ProtobufRPC;
+import java.util.concurrent.Future;
 
 /**
  * Simple echo service interface
@@ -38,6 +38,9 @@ public interface EchoService {
     @ProtobufRPC(serviceName = "echoService", onceTalkTimeout = 1000000)
     EchoInfo echo(EchoInfo info);
     
+    @ProtobufRPC(serviceName = "echoService", methodName = "echo2", onceTalkTimeout = 1000000)
+    Future<EchoInfo> echoAsync(EchoInfo info);
+    
     @ProtobufRPC(serviceName = "echoService", onceTalkTimeout = 10000000, 
             attachmentHandler = EchoClientAttachmentHandler.class, logIDGenerator = EchoLogIDGenerator.class)
     EchoInfo echoWithAttachement(EchoInfo info);
@@ -56,4 +59,7 @@ public interface EchoService {
     
     @ProtobufRPC(serviceName = "echoService", onceTalkTimeout = 1000)
     EchoInfo echoTimeout(EchoInfo info);
+    
+    @ProtobufRPC(serviceName = "echoService", onceTalkTimeout = 1000)
+    EchoInfo serverFailed(EchoInfo info);
 }

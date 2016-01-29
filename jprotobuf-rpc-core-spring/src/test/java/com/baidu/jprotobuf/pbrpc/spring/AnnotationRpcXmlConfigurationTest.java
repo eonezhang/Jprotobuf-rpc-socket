@@ -16,7 +16,6 @@
 package com.baidu.jprotobuf.pbrpc.spring;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.baidu.jprotobuf.pbrpc.EchoInfo;
@@ -28,7 +27,6 @@ import com.baidu.jprotobuf.pbrpc.EchoService;
  * @author xiemalin
  * @since 2.17
  */
-@Ignore
 public class AnnotationRpcXmlConfigurationTest extends RpcXmlConfigurationTestBase {
 
     protected String getConfigurationPath() {
@@ -79,6 +77,32 @@ public class AnnotationRpcXmlConfigurationTest extends RpcXmlConfigurationTestBa
         // test should throw exception and retry max times
         try {
             internalRpcRequestAndResponseTimeout(annotationEchoServiceClient.namingServiceOfTimeoutFailed);
+        } catch (Exception e) {
+            Assert.assertNotNull(e);
+        }
+    }
+    
+    @Test
+    public void testClientInterceptorFailed() {
+        AnnotationEchoServiceClient annotationEchoServiceClient =
+                context.getBean("echoServiceClient", AnnotationEchoServiceClient.class);
+        
+        // test should throw exception and retry max times
+        try {
+            internalRpcRequestAndResponseTimeout(annotationEchoServiceClient.clientFailedInterceptor);
+        } catch (Exception e) {
+            Assert.assertNotNull(e);
+        }
+    }
+    
+    @Test
+    public void testServerInterceptorFailed() {
+        AnnotationEchoServiceClient annotationEchoServiceClient =
+                context.getBean("echoServiceClient", AnnotationEchoServiceClient.class);
+        
+        // test should throw exception and retry max times
+        try {
+            internalRpcRequestAndResponseTimeout(annotationEchoServiceClient.serverFailedInterceptor);
         } catch (Exception e) {
             Assert.assertNotNull(e);
         }

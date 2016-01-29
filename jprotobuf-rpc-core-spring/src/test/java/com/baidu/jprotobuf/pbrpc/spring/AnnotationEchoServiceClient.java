@@ -31,11 +31,11 @@ import com.baidu.jprotobuf.pbrpc.spring.annotation.RpcProxy;
 public class AnnotationEchoServiceClient {
 
     @RpcProxy(port = "1031", host = "127.0.0.1", serviceInterface = EchoService.class, 
-            lookupStubOnStartup = false, rpcClientOptionsBeanName = "rpcClientOptions")
+            lookupStubOnStartup = false, rpcClientOptionsBeanName = "rpcClientOptions", invokerIntercepterBeanName = "annoClientInterceptor")
     public EchoService echoService;
 
     @HaRpcProxy(namingServiceBeanName = "namingService", serviceInterface = EchoService.class,
-            lookupStubOnStartup = false)
+            lookupStubOnStartup = false, invokerIntercepterBeanName = "annoHaClientInterceptor")
     public EchoService haEchoService;
 
     @HaRpcProxy(namingServiceBeanName = "namingServiceOfPartialFailed", serviceInterface = EchoService.class,
@@ -46,4 +46,13 @@ public class AnnotationEchoServiceClient {
     @HaRpcProxy(namingServiceBeanName = "namingService", serviceInterface = EchoService.class,
             lookupStubOnStartup = false, failoverInteceptorBeanName = "timeoutIngoredSocketFailOverInterceptor")
     public EchoService namingServiceOfTimeoutFailed;
+    
+    
+    @RpcProxy(port = "1034", host = "127.0.0.1", serviceInterface = EchoService.class, 
+            lookupStubOnStartup = false, rpcClientOptionsBeanName = "rpcClientOptions", invokerIntercepterBeanName = "failedAnnoClientInterceptor")
+    public EchoService clientFailedInterceptor;
+    
+    @RpcProxy(port = "1034", host = "127.0.0.1", serviceInterface = EchoService.class, 
+            lookupStubOnStartup = false, rpcClientOptionsBeanName = "rpcClientOptions")
+    public EchoService serverFailedInterceptor;
 }
