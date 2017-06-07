@@ -43,8 +43,10 @@ public abstract class BaseEchoServiceTest extends BaseTest {
 
     protected RpcServer rpcServer;
     protected EchoService echoService;
-    private RpcClient rpcClient;
+    protected RpcClient rpcClient;
     private ProtobufRpcProxy<EchoService> pbrpcProxy;
+    
+    
     
     @Before
     public void setUp() {
@@ -64,6 +66,11 @@ public abstract class BaseEchoServiceTest extends BaseTest {
             @Override
             public void beforeInvoke(MethodInvocationInfo methodInvocation) {
                 Assert.assertNotNull(methodInvocation.getMethod());
+                
+            }
+
+            @Override
+            public void afterProcess() {
                 
             }
 		});
@@ -92,6 +99,11 @@ public abstract class BaseEchoServiceTest extends BaseTest {
             @Override
             public void beforeInvoke(MethodInvocationInfo methodInvocation) {
                 Assert.assertNotNull(methodInvocation.getMethod());
+                
+            }
+
+            @Override
+            public void afterProcess() {
                 
             }
 		});

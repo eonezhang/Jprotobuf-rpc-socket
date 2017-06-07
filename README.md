@@ -15,10 +15,11 @@ Features:<br>
 - 集成内置HTTP管理功能(3.1.1版本+)
 
 关联项目：
-[https://github.com/jhunters/jprotobuf](https://github.com/jhunters/jprotobuf "https://github.com/jhunters/jprotobuf")
+[https://github.com/jhunters/jprotobuf](https://github.com/jhunters/jprotobuf "https://github.com/jhunters/jprotobuf")<br>
+golang 协议实现: [https://github.com/baidu-golang/baidurpc](https://github.com/baidu-golang/baidurpc "https://github.com/baidu-golang/baidurpc")
 
 ## 协议规范 ##
-[https://github.com/Baidu-ecom/Jprotobuf-rpc-socket/wiki/RPC%E9%80%9A%E8%AE%AF%E5%8D%8F%E8%AE%AE%E8%A7%84%E8%8C%83](https://github.com/Baidu-ecom/Jprotobuf-rpc-socket/wiki/RPC%E9%80%9A%E8%AE%AF%E5%8D%8F%E8%AE%AE%E8%A7%84%E8%8C%83 "协议规范")
+[https://github.com/jhunters/Jprotobuf-rpc-socket/wiki/RPC%E9%80%9A%E8%AE%AF%E5%8D%8F%E8%AE%AE%E8%A7%84%E8%8C%83](https://github.com/jhunters/Jprotobuf-rpc-socket/wiki/RPC%E9%80%9A%E8%AE%AF%E5%8D%8F%E8%AE%AE%E8%A7%84%E8%8C%83 "协议规范")
 
 
 ## 使用示例 ##
@@ -28,21 +29,21 @@ Features:<br>
 <dependency>
 	<groupId>com.baidu</groupId>
 	<artifactId>jprotobuf-rpc-core</artifactId>
-	<version>3.4.0</version>
+	<version>3.5.5</version>
 </dependency>
 
 <!-- 提供spring扩展 -->
 <dependency>
 	<groupId>com.baidu</groupId>
 	<artifactId>jprotobuf-rpc-core-spring</artifactId>
-	<version>3.4.0</version>
+	<version>3.5.5</version>
 </dependency>
 
 <!-- 基于redis实现服务注册，发现功能 -->
 <dependency>
 	<groupId>com.baidu</groupId>
 	<artifactId>jprotobuf-rpc-registry-redis</artifactId>
-	<version>3.4.0</version>
+	<version>3.5.5</version>
 </dependency>
 
 ```
@@ -51,7 +52,7 @@ Features:<br>
     <plugin>
         <groupId>com.baidu</groupId>
         <artifactId>jprotobuf-precompile-plugin</artifactId>
-        <version>1.2.1</version>
+        <version>1.2.4</version>
         <configuration>
             <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
             <filterClassPackage>com.baidu</filterClassPackage>
@@ -220,3 +221,23 @@ send byte size: 1139;receive byte size: 1139
 |              100000|                2012|                     0|               49701|                  40|
 ---------------------Performance Result-------------------------
 ```
+
+```property
+License
+
+/*
+ * Copyright 2002-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ ```

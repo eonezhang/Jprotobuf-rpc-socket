@@ -74,6 +74,13 @@ public class EchoServiceImpl {
         return doEcho(info);
     }
     
+    @ProtobufRPCService(serviceName = "echoService", methodName = "echoAuthenticateData", 
+            attachmentHandler = EchoServerAttachmentHandler.class, description ="echo测试服务带附件和Snappy压缩",
+            authenticationDataHandler = EchoServerAuthenticationDataHandler.class)
+    public EchoInfo dealWithAuthenticationDataEnable(EchoInfo info) {
+        return doEcho(info);
+    }
+    
     
     @ProtobufRPCService(serviceName = "echoService", methodName = "businessExceptionCall")
     public EchoInfo businessExceptionCall(EchoInfo info) {
@@ -86,5 +93,9 @@ public class EchoServiceImpl {
         EchoInfo ret = new EchoInfo();
         ret.setMessage("hello:" + info.getMessage());
         return ret;
+    }
+    
+    public EchoInfo doEchoDynamic(EchoInfo info) {
+        return info;
     }
 }

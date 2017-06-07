@@ -27,6 +27,10 @@ public class ServerMain {
 
     public static void main(String[] args) {
         
+        if (args.length == 0) {
+            args = new String[]{"8122"};
+        }
+        
         RpcServerOptions rpcServerOptions = new RpcServerOptions();
         rpcServerOptions.setHttpServerPort(8866);
         rpcServerOptions.setWorkThreads(50);
@@ -34,7 +38,7 @@ public class ServerMain {
         RpcServer rpcServer = new RpcServer(rpcServerOptions);
         EchoServiceImpl echoServiceImpl = new EchoServiceImpl();
         rpcServer.registerService(echoServiceImpl);
-        rpcServer.start(1031);
+        rpcServer.start(Integer.valueOf(args[0]));
         
     }
 }

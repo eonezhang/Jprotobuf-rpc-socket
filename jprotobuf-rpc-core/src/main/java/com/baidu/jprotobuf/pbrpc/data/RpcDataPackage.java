@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import com.baidu.jprotobuf.pbrpc.AuthenticationDataHandler;
 import com.baidu.jprotobuf.pbrpc.ClientAttachmentHandler;
 import com.baidu.jprotobuf.pbrpc.LogIDGenerator;
 import com.baidu.jprotobuf.pbrpc.client.RpcMethodInfo;
@@ -32,23 +33,36 @@ import com.baidu.jprotobuf.pbrpc.utils.ArrayUtils;
 import com.baidu.jprotobuf.pbrpc.utils.LogIdThreadLocalHolder;
 
 /**
- * 
- * RPC 包数据完整定义实现
- * 
+ * RPC 包数据完整定义实现.
+ *
  * @author xiemalin
  * @since 1.0
  */
 public class RpcDataPackage implements Readable, Writerable {
-    
+
+    /** The log. */
     private static Logger LOG = Logger.getLogger(RpcDataPackage.class.getName());
 
+    /** The head. */
     private RpcHeadMeta head;
+
+    /** The rpc meta. */
     private RpcMeta rpcMeta;
+
+    /** The data. */
     private byte[] data;
+
+    /** The attachment. */
     private byte[] attachment;
-    
+
+    /** The time stamp. */
     private long timeStamp;
 
+    /**
+     * Merge data.
+     *
+     * @param data the data
+     */
     public void mergeData(byte[] data) {
         if (data == null) {
             return;
@@ -65,10 +79,20 @@ public class RpcDataPackage implements Readable, Writerable {
         this.data = newData;
     }
 
+    /**
+     * Checks if is chunk package.
+     *
+     * @return true, if is chunk package
+     */
     public boolean isChunkPackage() {
         return getChunkStreamId() != null;
     }
 
+    /**
+     * Checks if is final package.
+     *
+     * @return true, if is final package
+     */
     public boolean isFinalPackage() {
         if (rpcMeta == null) {
             return true;
@@ -81,6 +105,11 @@ public class RpcDataPackage implements Readable, Writerable {
         return chunkInfo.getChunkId() == -1;
     }
 
+    /**
+     * Gets the chunk stream id.
+     *
+     * @return the chunk stream id
+     */
     public Long getChunkStreamId() {
         if (rpcMeta == null) {
             return null;
@@ -97,7 +126,7 @@ public class RpcDataPackage implements Readable, Writerable {
      * To split current {@link RpcDataPackage} by chunkSize. if chunkSize great than data length will not do split.<br>
      * {@link List} return will never be {@code null} or empty.
      * 
-     * @param chunkSize target size to split 
+     * @param chunkSize target size to split
      * @return {@link List} of {@link RpcDataPackage} after split
      */
     public List<RpcDataPackage> chunk(long chunkSize) {
@@ -131,6 +160,11 @@ public class RpcDataPackage implements Readable, Writerable {
         return ret;
     }
 
+    /**
+     * Copy.
+     *
+     * @return the rpc data package
+     */
     public RpcDataPackage copy() {
         RpcDataPackage rpcDataPackage = new RpcDataPackage();
         if (head != null) {
@@ -148,10 +182,10 @@ public class RpcDataPackage implements Readable, Writerable {
     }
 
     /**
-     * set magic code
-     * 
-     * @param magicCode
-     * @return
+     * set magic code.
+     *
+     * @param magicCode the magic code
+     * @return the rpc data package
      */
     public RpcDataPackage magicCode(String magicCode) {
         setMagicCode(magicCode);
@@ -159,8 +193,10 @@ public class RpcDataPackage implements Readable, Writerable {
     }
 
     /**
-     * @param serviceName
-     * @return
+     * Service name.
+     *
+     * @param serviceName the service name
+     * @return the rpc data package
      */
     public RpcDataPackage serviceName(String serviceName) {
         RpcRequestMeta request = initRequest();
@@ -168,64 +204,131 @@ public class RpcDataPackage implements Readable, Writerable {
         return this;
     }
 
+    /**
+     * Method name.
+     *
+     * @param methodName the method name
+     * @return the rpc data package
+     */
     public RpcDataPackage methodName(String methodName) {
         RpcRequestMeta request = initRequest();
         request.setMethodName(methodName);
         return this;
     }
 
+    /**
+     * Data.
+     *
+     * @param data the data
+     * @return the rpc data package
+     */
     public RpcDataPackage data(byte[] data) {
         setData(data);
         return this;
     }
 
+    /**
+     * Attachment.
+     *
+     * @param attachment the attachment
+     * @return the rpc data package
+     */
     public RpcDataPackage attachment(byte[] attachment) {
         setAttachment(attachment);
         return this;
     }
 
+    /**
+     * Authentication data.
+     *
+     * @param authenticationData the authentication data
+     * @return the rpc data package
+     */
     public RpcDataPackage authenticationData(byte[] authenticationData) {
         RpcMeta rpcMeta = initRpcMeta();
         rpcMeta.setAuthenticationData(authenticationData);
         return this;
     }
 
+    /**
+     * Correlation id.
+     *
+     * @param correlationId the correlation id
+     * @return the rpc data package
+     */
     public RpcDataPackage correlationId(long correlationId) {
         RpcMeta rpcMeta = initRpcMeta();
         rpcMeta.setCorrelationId(correlationId);
         return this;
     }
 
+    /**
+     * Compress type.
+     *
+     * @param compressType the compress type
+     * @return the rpc data package
+     */
     public RpcDataPackage compressType(int compressType) {
         RpcMeta rpcMeta = initRpcMeta();
         rpcMeta.setCompressType(compressType);
         return this;
     }
 
+    /**
+     * Log id.
+     *
+     * @param logId the log id
+     * @return the rpc data package
+     */
     public RpcDataPackage logId(long logId) {
         RpcRequestMeta request = initRequest();
         request.setLogId(logId);
         return this;
     }
 
+    /**
+     * Error code.
+     *
+     * @param errorCode the error code
+     * @return the rpc data package
+     */
     public RpcDataPackage errorCode(int errorCode) {
         RpcResponseMeta response = initResponse();
         response.setErrorCode(errorCode);
         return this;
     }
 
+    /**
+     * Error text.
+     *
+     * @param errorText the error text
+     * @return the rpc data package
+     */
     public RpcDataPackage errorText(String errorText) {
         RpcResponseMeta response = initResponse();
         response.setErrorText(errorText);
         return this;
     }
 
+    /**
+     * Extra params.
+     *
+     * @param params the params
+     * @return the rpc data package
+     */
     public RpcDataPackage extraParams(byte[] params) {
         RpcRequestMeta request = initRequest();
         request.setExtraParam(params);
         return this;
     }
 
+    /**
+     * Chunk info.
+     *
+     * @param streamId the stream id
+     * @param chunkId the chunk id
+     * @return the rpc data package
+     */
     public RpcDataPackage chunkInfo(long streamId, int chunkId) {
         ChunkInfo chunkInfo = new ChunkInfo();
         chunkInfo.setStreamId(streamId);
@@ -236,7 +339,9 @@ public class RpcDataPackage implements Readable, Writerable {
     }
 
     /**
-     * 
+     * Inits the request.
+     *
+     * @return the rpc request meta
      */
     private RpcRequestMeta initRequest() {
         RpcMeta rpcMeta = initRpcMeta();
@@ -250,6 +355,11 @@ public class RpcDataPackage implements Readable, Writerable {
         return request;
     }
 
+    /**
+     * Inits the response.
+     *
+     * @return the rpc response meta
+     */
     private RpcResponseMeta initResponse() {
         RpcMeta rpcMeta = initRpcMeta();
 
@@ -263,7 +373,9 @@ public class RpcDataPackage implements Readable, Writerable {
     }
 
     /**
-     * 
+     * Inits the rpc meta.
+     *
+     * @return the rpc meta
      */
     private RpcMeta initRpcMeta() {
         if (rpcMeta == null) {
@@ -272,6 +384,11 @@ public class RpcDataPackage implements Readable, Writerable {
         return rpcMeta;
     }
 
+    /**
+     * Sets the magic code.
+     *
+     * @param magicCode the new magic code
+     */
     public void setMagicCode(String magicCode) {
         if (head == null) {
             head = new RpcHeadMeta();
@@ -280,8 +397,8 @@ public class RpcDataPackage implements Readable, Writerable {
     }
 
     /**
-     * get the head
-     * 
+     * Gets the head.
+     *
      * @return the head
      */
     public RpcHeadMeta getHead() {
@@ -289,37 +406,35 @@ public class RpcDataPackage implements Readable, Writerable {
     }
 
     /**
-     * set head value to head
-     * 
-     * @param head
-     *            the head to set
+     * Sets the head.
+     *
+     * @param head the new head
      */
     public void setHead(RpcHeadMeta head) {
         this.head = head;
     }
 
     /**
-     * get the rpcMeta
-     * 
-     * @return the rpcMeta
+     * Gets the rpc meta.
+     *
+     * @return the rpc meta
      */
     public RpcMeta getRpcMeta() {
         return rpcMeta;
     }
 
     /**
-     * set rpcMeta value to rpcMeta
-     * 
-     * @param rpcMeta
-     *            the rpcMeta to set
+     * Sets the rpc meta.
+     *
+     * @param rpcMeta the new rpc meta
      */
     protected void setRpcMeta(RpcMeta rpcMeta) {
         this.rpcMeta = rpcMeta;
     }
 
     /**
-     * get the data
-     * 
+     * Gets the data.
+     *
      * @return the data
      */
     public byte[] getData() {
@@ -327,34 +442,35 @@ public class RpcDataPackage implements Readable, Writerable {
     }
 
     /**
-     * set data value to data
-     * 
-     * @param data
-     *            the data to set
+     * Sets the data.
+     *
+     * @param data the new data
      */
     public void setData(byte[] data) {
         this.data = data;
     }
 
     /**
-     * get the timeStamp
-     * @return the timeStamp
+     * Gets the time stamp.
+     *
+     * @return the time stamp
      */
     public long getTimeStamp() {
         return timeStamp;
     }
 
     /**
-     * set timeStamp value to timeStamp
-     * @param timeStamp the timeStamp to set
+     * Sets the time stamp.
+     *
+     * @param timeStamp the new time stamp
      */
     public void setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
     }
 
     /**
-     * get the attachment
-     * 
+     * Gets the attachment.
+     *
      * @return the attachment
      */
     public byte[] getAttachment() {
@@ -362,19 +478,31 @@ public class RpcDataPackage implements Readable, Writerable {
     }
 
     /**
-     * set attachment value to attachment
-     * 
-     * @param attachment
-     *            the attachment to set
+     * Sets the attachment.
+     *
+     * @param attachment the new attachment
      */
     public void setAttachment(byte[] attachment) {
         this.attachment = attachment;
     }
 
+    /**
+     * Gets the error response rpc data package.
+     *
+     * @param errorCode the error code
+     * @param errorText the error text
+     * @return the error response rpc data package
+     */
     public RpcDataPackage getErrorResponseRpcDataPackage(int errorCode, String errorText) {
         return getErrorResponseRpcDataPackage(new RpcResponseMeta(errorCode, errorText));
     }
 
+    /**
+     * Gets the error response rpc data package.
+     *
+     * @param responseMeta the response meta
+     * @return the error response rpc data package
+     */
     public RpcDataPackage getErrorResponseRpcDataPackage(RpcResponseMeta responseMeta) {
         RpcDataPackage response = new RpcDataPackage();
 
@@ -427,7 +555,7 @@ public class RpcDataPackage implements Readable, Writerable {
         totolSize += rpcMetaSize;
         head.setMetaSize(rpcMetaSize);
         head.setMessageSize(totolSize); // set message body size
-        
+
         // total size should add head size
         totolSize = totolSize + RpcHeadMeta.SIZE;
         try {
@@ -448,7 +576,8 @@ public class RpcDataPackage implements Readable, Writerable {
                 baos.write(attachment);
             }
 
-            return baos.toByteArray();
+            byte[] ret = baos.toByteArray();
+            return ret;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -504,6 +633,14 @@ public class RpcDataPackage implements Readable, Writerable {
 
     }
 
+    /**
+     * Builds the rpc data package.
+     *
+     * @param methodInfo the method info
+     * @param args the args
+     * @return the rpc data package
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public static RpcDataPackage buildRpcDataPackage(RpcMethodInfo methodInfo, Object[] args) throws IOException {
         RpcDataPackage dataPackage = new RpcDataPackage();
         dataPackage.magicCode(ProtocolConstant.MAGIC_CODE);
@@ -516,7 +653,7 @@ public class RpcDataPackage implements Readable, Writerable {
                 dataPackage.data(data);
             }
         }
-        
+
         // set logid
         // if logid exsit under thread local holder
         Long elogId = LogIdThreadLocalHolder.getLogId();
@@ -527,7 +664,8 @@ public class RpcDataPackage implements Readable, Writerable {
         } else {
             LogIDGenerator logIDGenerator = methodInfo.getLogIDGenerator();
             if (logIDGenerator != null) {
-                long logId = logIDGenerator.generate(methodInfo.getServiceName(), methodInfo.getMethod().getName(), args);
+                long logId =
+                        logIDGenerator.generate(methodInfo.getServiceName(), methodInfo.getMethod().getName(), args);
                 dataPackage.logId(logId);
             }
         }
@@ -535,12 +673,23 @@ public class RpcDataPackage implements Readable, Writerable {
         // set attachment
         ClientAttachmentHandler attachmentHandler = methodInfo.getClientAttachmentHandler();
         if (attachmentHandler != null) {
-            byte[] attachment = attachmentHandler.handleRequest(methodInfo.getServiceName(), methodInfo.getMethod()
-                    .getName(), args);
+            byte[] attachment = attachmentHandler.handleRequest(methodInfo.getServiceName(),
+                    methodInfo.getMethod().getName(), args);
             if (attachment != null) {
                 dataPackage.attachment(attachment);
             }
         }
+
+        // set authentication data
+        AuthenticationDataHandler authenticationDataHandler = methodInfo.getAuthenticationDataHandler();
+        if (authenticationDataHandler != null) {
+            byte[] authenticationData = authenticationDataHandler.create(methodInfo.getServiceName(),
+                    methodInfo.getMethod().getName(), args);
+            if (authenticationData != null) {
+                dataPackage.authenticationData(authenticationData);
+            }
+        }
+
         return dataPackage;
     }
 

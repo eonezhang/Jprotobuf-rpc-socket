@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,10 @@ package com.baidu.jprotobuf.pbrpc.client;
 import java.io.IOException;
 import java.lang.reflect.Method;
 
+import com.baidu.jprotobuf.pbrpc.AuthenticationDataHandler;
 import com.baidu.jprotobuf.pbrpc.ClientAttachmentHandler;
+import com.baidu.jprotobuf.pbrpc.DummyAuthenticationDataHandler;
+import com.baidu.jprotobuf.pbrpc.ServerAuthenticationDataHandler;
 import com.baidu.jprotobuf.pbrpc.DummyClientAttachmentHandler;
 import com.baidu.jprotobuf.pbrpc.DummyLogIDGenerator;
 import com.baidu.jprotobuf.pbrpc.LogIDGenerator;
@@ -29,30 +32,67 @@ import com.google.protobuf.GeneratedMessage;
 
 /**
  * RPC method description info.
- * 
+ *
  * @author xiemalin
- * @since 1.0
  * @see ProtobufRpcProxy
  * @see ProtobufRPC
+ * @since 1.0
  */
 public abstract class RpcMethodInfo {
 
+    /** The method. */
     private Method method;
+    
+    /** The protobuf prc. */
     private ProtobufRPC protobufPRC;
+    
+    /** The service name. */
     private String serviceName;
+    
+    /** The method name. */
     private String methodName;
+    
+    /** The once talk timeout. */
     private long onceTalkTimeout;
 
+    /** The input class. */
     private Class<? extends Object> inputClass;
+    
+    /** The output class. */
     private Class<? extends Object> outputClass;
 
+    /** The log id generator. */
     private LogIDGenerator logIDGenerator;
+    
+    /** The client attachment handler. */
     private ClientAttachmentHandler clientAttachmentHandler;
+    /** The authentication data handler. */
+    private AuthenticationDataHandler authenticationDataHandler;
 
+    /**
+     * Input encode.
+     *
+     * @param input the input
+     * @return the byte[]
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public abstract byte[] inputEncode(Object input) throws IOException;
 
+    /**
+     * Output decode.
+     *
+     * @param output the output
+     * @return the object
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public abstract Object outputDecode(byte[] output) throws IOException;
 
+    /**
+     * Checks if is message type.
+     *
+     * @param method the method
+     * @return true, if is message type
+     */
     public static boolean isMessageType(Method method) {
 
         boolean paramMessagetType = false;
@@ -80,8 +120,10 @@ public abstract class RpcMethodInfo {
     }
 
     /**
-     * @param method
-     * @param protobufPRC
+     * Instantiates a new rpc method info.
+     *
+     * @param method the method
+     * @param protobufPRC the protobuf prc
      */
     public RpcMethodInfo(Method method, ProtobufRPC protobufPRC) {
         this.method = method;
@@ -116,109 +158,117 @@ public abstract class RpcMethodInfo {
             try {
                 clientAttachmentHandler = attachmentHandlerClass.newInstance();
             } catch (Exception e) {
-                throw new IllegalAccessError("Can not initialize 'logIDGenerator' of class '"
+                throw new IllegalAccessError("Can not initialize 'ClientAttachmentHandler' of class '"
                         + attachmentHandlerClass.getName() + "'");
             }
         }
+        
+        Class<? extends AuthenticationDataHandler> authenticationDataHandlerCls = protobufPRC.authenticationDataHandler();
+        if (authenticationDataHandlerCls != DummyAuthenticationDataHandler.class) {
+            try {
+                authenticationDataHandler = authenticationDataHandlerCls.newInstance();
+            } catch (Exception e) {
+                throw new IllegalAccessError("Can not initialize 'AuthenticationDataHandler' of class '"
+                        + authenticationDataHandlerCls.getName() + "'");
+            }
+        }
+        
 
     }
 
     /**
-     * get the logIDGenerator
-     * 
-     * @return the logIDGenerator
+     * Gets the log id generator.
+     *
+     * @return the log id generator
      */
     public LogIDGenerator getLogIDGenerator() {
         return logIDGenerator;
     }
 
     /**
-     * get the clientAttachmentHandler
-     * 
-     * @return the clientAttachmentHandler
+     * Gets the client attachment handler.
+     *
+     * @return the client attachment handler
      */
     public ClientAttachmentHandler getClientAttachmentHandler() {
         return clientAttachmentHandler;
     }
 
     /**
-     * get the inputClass
-     * 
-     * @return the inputClass
+     * Gets the input class.
+     *
+     * @return the input class
      */
     public Class<? extends Object> getInputClass() {
         return inputClass;
     }
 
     /**
-     * get the outputClass
-     * 
-     * @return the outputClass
+     * Gets the output class.
+     *
+     * @return the output class
      */
     public Class<? extends Object> getOutputClass() {
         return outputClass;
     }
 
     /**
-     * get the serviceName
-     * 
-     * @return the serviceName
+     * Gets the service name.
+     *
+     * @return the service name
      */
     public String getServiceName() {
         return serviceName;
     }
 
     /**
-     * set serviceName value to serviceName
-     * 
-     * @param serviceName
-     *            the serviceName to set
+     * Sets the service name.
+     *
+     * @param serviceName the new service name
      */
     public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
     }
 
     /**
-     * get the methodName
-     * 
-     * @return the methodName
+     * Gets the method name.
+     *
+     * @return the method name
      */
     public String getMethodName() {
         return methodName;
     }
 
     /**
-     * set methodName value to methodName
-     * 
-     * @param methodName
-     *            the methodName to set
+     * Sets the method name.
+     *
+     * @param methodName the new method name
      */
     public void setMethodName(String methodName) {
         this.methodName = methodName;
     }
 
     /**
-     * get the onceTalkTimeout
-     * 
-     * @return the onceTalkTimeout
+     * Gets the once talk timeout.
+     *
+     * @return the once talk timeout
      */
     public long getOnceTalkTimeout() {
         return onceTalkTimeout;
     }
 
     /**
-     * set onceTalkTimeout value to onceTalkTimeout
-     * 
-     * @param onceTalkTimeout
-     *            the onceTalkTimeout to set
+     * Sets the once talk timeout.
+     *
+     * @param onceTalkTimeout the new once talk timeout
      */
     public void setOnceTalkTimeout(long onceTalkTimeout) {
         this.onceTalkTimeout = onceTalkTimeout;
     }
 
     /**
-     * get the method
-     * 
+     * Gets the method.
+     *
      * @return the method
      */
     public Method getMethod() {
@@ -226,12 +276,21 @@ public abstract class RpcMethodInfo {
     }
 
     /**
-     * get the protobufPRC
-     * 
-     * @return the protobufPRC
+     * Gets the protobuf prc.
+     *
+     * @return the protobuf prc
      */
     public ProtobufRPC getProtobufPRC() {
         return protobufPRC;
     }
 
+    /**
+     * get the authenticationDataHandler
+     * @return the authenticationDataHandler
+     */
+    public AuthenticationDataHandler getAuthenticationDataHandler() {
+        return authenticationDataHandler;
+    }
+
+    
 }

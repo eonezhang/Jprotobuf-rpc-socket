@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,14 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Compress supports by GZIP
- * 
+ * Compress supports by GZIP.
+ *
  * @author xiemalin
  * @since 1.4
  */
 public class GZipCompress implements Compress {
 
-    /**
-     * default buffer size
-     */
+    /** default buffer size. */
     private static final int BUFFER_SIZE = 256;
 
     /*
@@ -41,28 +39,39 @@ public class GZipCompress implements Compress {
      * @see com.baidu.jprotobuf.pbrpc.compress.Compress#compress(byte[])
      */
     public byte[] compress(byte[] array) throws IOException {
+        return compress0(array);
+    }
+    
+    public byte[] compress0(byte[] array) throws IOException {
         if (array == null) {
             return null;
         }
 
+        byte[] ret = null;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         GZIPOutputStream gzip;
         try {
             gzip = new GZIPOutputStream(out);
             gzip.write(array);
             gzip.close();
+            ret = out.toByteArray();
         } catch (IOException e) {
             throw e;
         }
-        return out.toByteArray();
+        return ret;
     }
 
+    
     /*
      * (non-Javadoc)
      * 
      * @see com.baidu.jprotobuf.pbrpc.compress.Compress#unCompress(byte[])
      */
     public byte[] unCompress(byte[] array) throws IOException {
+        return unCompress0(array);
+    }
+    
+    public byte[] unCompress0(byte[] array) throws IOException {
         if (array == null) {
             return null;
         }
@@ -71,7 +80,9 @@ public class GZipCompress implements Compress {
         ByteArrayInputStream in = new ByteArrayInputStream(array);
 
         try {
-            GZIPInputStream gunzip = new GZIPInputStream(in);
+            GZIPInputStream gunzip = new GZIPInputStream(in) {
+                
+            };
             byte[] buffer = new byte[BUFFER_SIZE];
             int n;
             while ((n = gunzip.read(buffer)) >= 0) {

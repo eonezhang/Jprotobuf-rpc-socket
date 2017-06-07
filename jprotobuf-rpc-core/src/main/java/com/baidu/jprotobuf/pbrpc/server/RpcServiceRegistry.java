@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.baidu.jprotobuf.pbrpc.server;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,11 +24,15 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.baidu.jprotobuf.pbrpc.DummyServerAuthenticationDataHandler;
 import com.baidu.jprotobuf.pbrpc.ProtobufRPCService;
 import com.baidu.jprotobuf.pbrpc.RpcHandler;
+import com.baidu.jprotobuf.pbrpc.ServerAttachmentHandler;
+import com.baidu.jprotobuf.pbrpc.ServerAuthenticationDataHandler;
 import com.baidu.jprotobuf.pbrpc.client.RpcMethodInfo;
 import com.baidu.jprotobuf.pbrpc.intercept.InvokerInterceptor;
 import com.baidu.jprotobuf.pbrpc.meta.RpcServiceMetaServiceProvider;
+import com.baidu.jprotobuf.pbrpc.utils.Constants;
 import com.baidu.jprotobuf.pbrpc.utils.ReflectionUtils;
 import com.baidu.jprotobuf.pbrpc.utils.ServiceSignatureUtils;
 import com.baidu.jprotobuf.pbrpc.utils.StringUtils;
@@ -40,9 +45,7 @@ import com.baidu.jprotobuf.pbrpc.utils.StringUtils;
  */
 public class RpcServiceRegistry {
 
-    /**
-     * log this class
-     */
+    /** log this class. */
     protected static final Logger LOGGER = Logger.getLogger(RpcServiceRegistry.class.getName());
 
     /**
@@ -54,43 +57,54 @@ public class RpcServiceRegistry {
      * if override exist allowed. default is not allowed
      */
     private boolean dummyOverride = false;
-    
-	private InvokerInterceptor interceptor;
 
-	/**
-	 * set interceptor value to interceptor
-	 * 
-	 * @param interceptor
-	 *            the interceptor to set
-	 */
-	public void setInterceptor(InvokerInterceptor interceptor) {
-		this.interceptor = interceptor;
-	}
+    /** The interceptor. */
+    private InvokerInterceptor interceptor;
 
     /**
-     * default constructor
+     * Sets the interceptor.
+     *
+     * @param interceptor the new interceptor
+     */
+    public void setInterceptor(InvokerInterceptor interceptor) {
+        this.interceptor = interceptor;
+    }
+
+    /**
+     * default constructor.
      */
     public RpcServiceRegistry() {
     }
 
+    /**
+     * Do register meta service.
+     */
     public void doRegisterMetaService() {
         RpcServiceMetaServiceProvider metaService = new RpcServiceMetaServiceProvider(this);
         registerService(metaService);
     }
 
+    /**
+     * Un register all.
+     */
     public void unRegisterAll() {
         serviceMap.clear();
     }
 
     /**
-     * set dummyOverride value to dummyOverride
-     * 
-     * @param dummyOverride the dummyOverride to set
+     * Sets the if override exist allowed.
+     *
+     * @param dummyOverride the new if override exist allowed
      */
     public void setDummyOverride(boolean dummyOverride) {
         this.dummyOverride = dummyOverride;
     }
 
+    /**
+     * Register service.
+     *
+     * @param target the target
+     */
     public void registerService(final Object target) {
         if (target == null) {
             throw new IllegalArgumentException("Param 'target' is null.");
@@ -112,6 +126,14 @@ public class RpcServiceRegistry {
 
     }
 
+    /**
+     * Do create rpc handler.
+     *
+     * @param method the method
+     * @param service the service
+     * @param protobufPRCService the protobuf prc service
+     * @return the rpc handler
+     */
     protected RpcHandler doCreateRpcHandler(Method method, Object service, ProtobufRPCService protobufPRCService) {
         boolean messageType = RpcMethodInfo.isMessageType(method);
         AbstractAnnotationRpcHandler rpcHandler;
@@ -127,7 +149,81 @@ public class RpcServiceRegistry {
         return rpcHandler;
     }
 
-    private void doRegiterService(Method method, Object service, ProtobufRPCService protobufPRCService) {
+    /**
+     * Do dynamic register service.
+     *
+     * @param methodSignature the method signature
+     * @param method the method
+     * @param service the service
+     * @param cls the cls
+     */
+    public void doDynamicRegisterService(final String methodSignature, Method method, Object service,
+            final Class<? extends ServerAttachmentHandler> cls) {
+        doDynamicRegisterService(Constants.DYNAMIC_SERVICE_NAME, methodSignature, method, service, cls);
+    }
+    
+    public void doDynamicRegisterService(final String serviceName, final String methodName, Method method,
+            Object service, final Class<? extends ServerAttachmentHandler> cls) {
+        doDynamicRegisterService(serviceName, methodName, method, 
+                service, cls, DummyServerAuthenticationDataHandler.class);
+    }
+
+    /**
+     * Do dynamic register service.
+     *
+     * @param serviceName the service name
+     * @param methodName the method name
+     * @param method the method
+     * @param service the service
+     * @param cls the cls
+     */
+    public void doDynamicRegisterService(final String serviceName, final String methodName, Method method,
+            Object service, final Class<? extends ServerAttachmentHandler> cls, 
+            final Class<? extends ServerAuthenticationDataHandler> authentiationDataCls) {
+        ProtobufRPCService protobufPRCService = new ProtobufRPCService() {
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return ProtobufRPCService.class;
+            }
+
+            @Override
+            public String serviceName() {
+                return serviceName;
+            }
+
+            @Override
+            public String methodName() {
+                return methodName;
+            }
+
+            @Override
+            public String description() {
+                return "";
+            }
+
+            @Override
+            public Class<? extends ServerAttachmentHandler> attachmentHandler() {
+                return cls;
+            }
+
+            @Override
+            public Class<? extends ServerAuthenticationDataHandler> authenticationDataHandler() {
+                return authentiationDataCls;
+            }
+        };
+
+        doRegiterService(method, service, protobufPRCService);
+    }
+
+    /**
+     * Do regiter service.
+     *
+     * @param method the method
+     * @param service the service
+     * @param protobufPRCService the protobuf prc service
+     */
+    protected void doRegiterService(Method method, Object service, ProtobufRPCService protobufPRCService) {
         RpcHandler rpcHandler = doCreateRpcHandler(method, service, protobufPRCService);
         String methodSignature = rpcHandler.getMethodSignature();
 
@@ -150,22 +246,43 @@ public class RpcServiceRegistry {
 
     }
 
+    /**
+     * Gets the method signature.
+     *
+     * @param serviceName the service name
+     * @param method the method
+     * @return the method signature
+     */
     private String getMethodSignature(String serviceName, String method) {
         String methodSignature = ServiceSignatureUtils.makeSignature(serviceName, method);
         return methodSignature;
     }
 
+    /**
+     * Lookup service.
+     *
+     * @param serviceName the service name
+     * @param methodName the method name
+     * @return the rpc handler
+     */
     public RpcHandler lookupService(String serviceName, String methodName) {
         String methodSignature = getMethodSignature(serviceName, methodName);
         return serviceMap.get(methodSignature);
     }
 
+    /**
+     * Gets the services.
+     *
+     * @return the services
+     */
     public Collection<RpcHandler> getServices() {
         return serviceMap.values();
     }
 
     /**
-     * @param serviceExporter
+     * Register service.
+     *
+     * @param serviceExporter the service exporter
      */
     public void registerService(IDLServiceExporter serviceExporter) {
         if (serviceExporter == null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,23 @@
  */
 package com.baidu.jprotobuf.pbrpc.intercept;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 /**
- * A chained {@link InvokerInterceptor} for multiple intercepter to apply
+ * A chained {@link InvokerInterceptor} for multiple intercepter to apply.
  *
  * @author xiemalin
  * @since 3.4.1
  */
 public class ChainedInvokerInterceptor implements InvokerInterceptor {
 	
+	/** The interceptors. */
 	private List<InvokerInterceptor> interceptors;
 	
 	/**
-	 * set interceptors value to interceptors
-	 * @param interceptors the interceptors to set
+	 * Sets the interceptors.
+	 *
+	 * @param interceptors the new interceptors
 	 */
 	public void setInterceptors(List<InvokerInterceptor> interceptors) {
 		this.interceptors = interceptors;
@@ -69,5 +70,19 @@ public class ChainedInvokerInterceptor implements InvokerInterceptor {
 
 		return result;
 	}
+
+    /* (non-Javadoc)
+     * @see com.baidu.jprotobuf.pbrpc.intercept.InvokerInterceptor#afterProcess()
+     */
+    @Override
+    public void afterProcess() {
+        if (interceptors == null) {
+            return;
+        }
+
+        for (InvokerInterceptor interceptor : interceptors) {
+            interceptor.afterProcess();
+        }
+    }
 
 }
